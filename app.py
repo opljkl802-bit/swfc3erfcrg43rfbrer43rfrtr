@@ -35,7 +35,6 @@ bot = Client(
     api_hash=api_hash,
     bot_token=bot_token,
     sleep_threshold=60,  # Wait 60 seconds before reconnecting
-    max_retries=5  # Retry 5 times before giving up
 )
 
 @bot.on_message()
