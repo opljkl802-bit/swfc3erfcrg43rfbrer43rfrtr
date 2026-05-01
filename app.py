@@ -29,14 +29,14 @@ api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 
 # Pyrogram bot setup with reconnection logic
+# Example initialization
 bot = Client(
     "my_bot",
-    api_id=api_id,
-    api_hash=api_hash,
-    bot_token=bot_token,
-    sleep_threshold=60,  # Wait 60 seconds before reconnecting
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN,
+    session_string=SESSION_STRING # Isse session file ki zaroorat nahi padegi
 )
-
 @bot.on_message()
 async def my_handler(client, message):
     await message.reply("Hello from Tech VJ Bot!")
@@ -44,13 +44,13 @@ async def my_handler(client, message):
 async def main():
     try:
         await bot.start()
-        print("Bot is running...")
-        await bot.idle()  # Keep the bot running
+        print("Bot Started!")
+        # Baaki ka logic yahan...
     except Exception as e:
         print(f"Error: {e}")
-        await bot.stop()
-        await asyncio.sleep(5)  # Wait 5 seconds before restarting
-        await bot.start()
+    finally:
+        if bot.is_connected:
+            await bot.stop()
 
 if __name__ == "__main__":
     bot.run(main())
