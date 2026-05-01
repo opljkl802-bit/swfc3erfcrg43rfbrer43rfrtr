@@ -35,7 +35,6 @@ bot = Client(
     api_id=int(API_ID) if API_ID else None, # String ko integer mein convert kiya
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    session_string=SESSION_STRING # Agar session string nahi hai toh ye None rahega
     sleep_threshold=60,  # Wait 60 seconds before reconnecting
     max_retries=5  # Retry 5 times before giving up
 )
