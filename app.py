@@ -24,9 +24,11 @@ def run_flask():
 Thread(target=run_flask).start()
 
 # Fetch credentials from environment variables
-api_id = os.getenv("API_ID")
-api_hash = os.getenv("API_HASH")
-bot_token = os.getenv("BOT_TOKEN")
+import os
+
+API_ID = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Pyrogram bot setup with reconnection logic
 # Example initialization
