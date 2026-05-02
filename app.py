@@ -1,51 +1,57 @@
 import os
-import asyncio
-import importlib
 from flask import Flask
 from threading import Thread
-from pyrogram import idle
-from Extractor import app as bot  # Aapke __init__.py mein 'app' hai, use 'bot' ki tarah import kiya
-from Extractor.modules import ALL_MODULES[cite: 1]
+from pyrogram import Client
+import asyncio
+from cleanup import start_cleanup_scheduler
 
-# --- Flask Server for Render Port Binding ---
-server = Flask(__name__)
+# Start the cleanup scheduler
+scheduler = start_cleanup_scheduler()
 
-@server.route('/')
-def health_check():
-    return "Extractor Bot is Running Live!"
+# Your existing app code continues here...
+
+# Flask app to keep Heroku dyno alive
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello from Tech VJ'
 
 def run_flask():
-    # Render automatically sets PORT environment variable
-    port = int(os.environ.get("PORT", 8080))
-    server.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=8080)
 
 # Start Flask in a separate thread
-Thread(target=run_flask, daemon=True).start()
+Thread(target=run_flask).start()
 
-# --- Main Bot Logic ---
-async def start_extractor():
-    print(">>> Loading Modules...")
-    # Har module ko import karna taaki handlers register ho jayein
-    for all_module in ALL_MODULES:
-        try:
-            importlib.import_module("Extractor.modules." + all_module)
-            print(f"Successfully loaded: {all_module}")
-        except Exception as e:
-            print(f"Error loading module {all_module}: {e}")
+# Fetch credentials from environment variables
+api_id = os.getenv("API_ID")
+api_hash = os.getenv("API_HASH")
+bot_token = os.getenv("BOT_TOKEN")
 
-    print("» ʙᴏᴛ ᴅᴇᴘʟᴏʏ sᴜᴄᴄᴇssғᴜʟʟʏ ✨ 🎉")
-    
-    # Bot ko chalu rakhne ke liye idle loop
-    await idle()
-    
-    if bot.is_connected:
+# Pyrogram bot setup with reconnection logic
+bot = Client(
+    "my_bot",
+    api_id=api_id,
+    api_hash=api_hash,
+    bot_token=bot_token,
+    sleep_threshold=60,  # Wait 60 seconds before reconnecting
+    max_retries=5  # Retry 5 times before giving up
+)
+
+@bot.on_message()
+async def my_handler(client, message):
+    await message.reply("Hello from Tech VJ Bot!")
+
+async def main():
+    try:
+        await bot.start()
+        print("Bot is running...")
+        await bot.idle()  # Keep the bot running
+    except Exception as e:
+        print(f"Error: {e}")
         await bot.stop()
-    print("» ɢᴏᴏᴅ ʙʏᴇ ! sᴛᴏᴘᴘɪɴɢ ʙᴏᴛ.")
+        await asyncio.sleep(5)  # Wait 5 seconds before restarting
+        await bot.start()
 
 if __name__ == "__main__":
-    # Asyncio loop handle karna
-    loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(start_extractor())
-    except KeyboardInterrupt:
-        pass
+    bot.run(main())
